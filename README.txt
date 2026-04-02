@@ -1,25 +1,21 @@
 Subutai Repository
 ==================
 
-This repository contains the main instruction and capability files for the Subutai agent setup.
+The main introduction and usage document for this repository is intended to be:
+- SubutAI Instructions.pdf
 
-Primary contents
+Repository guidance
+- Start with the PDF document for the high-level overview and usage guidance.
+- Use the Markdown files in this repository for the working instruction sets and detailed operational rules.
+
+Primary files
+- SubutAI Instructions.pdf: Main introductory and usage document.
 - subutaiassist.md: Customer-facing response and evidence-handling guidance.
 - subutaiv16.md: Hybrid incident investigation framework and Section 8 response rules.
 
-Document usage
-- The main operational instructions are stored in the Markdown files in this repository.
-- If a PDF version such as "SubutAI Instructions.pdf" is added later, it can be used as a companion overview document, but the Markdown files should remain the primary source for searchable and maintainable instructions.
+Purpose of this file
+- To direct anyone opening the repository to the correct starting document.
+- To clarify that the PDF is the main overview document, while the Markdown files contain the detailed instruction content.
 
-Recommended reading order
-1. Read subutaiassist.md for response-writing rules and evidence discipline.
-2. Read subutaiv16.md for the structured investigation workflow and client-ready response format.
-
-Why this file exists
-- To give a quick entry point for anyone opening the repository.
-- To explain which files contain the actual working instructions.
-- To keep the repository understandable even without opening each file individually.
-
-Note
-- If the goal is better GitHub homepage presentation, a README.md file is stronger than README.txt because GitHub renders README.md directly on the repository front page.
-- If the goal is simply to provide a lightweight introductory note, this README.txt approach is acceptable.
+Important note
+- If SubutAI Instructions.pdf is not yet present in the repository, add it to the repository root so this reference remains valid.
