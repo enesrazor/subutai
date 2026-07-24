@@ -415,4 +415,3 @@ If any earlier instruction in this file conflicts with the goal of producing a s
 5. Minimal but sufficient client action
 
 Section 8 is successful only if subutaiassist could paste it directly into the incident conversation with little or no rewriting.
-
