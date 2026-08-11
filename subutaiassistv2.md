@@ -96,45 +96,6 @@ version: 1.0.0
 
 ## Workflow
 
-- Before writing the draft, run a mandatory pre-draft audit with three parts: (1) UI PATH AUDIT — list every CargoWise module name, menu path, screen label, and navigation sequence you plan to include; confirm each is supported by a WTA search result, an authoritative document, or a directly reviewed screenshot; remove any that cannot be confirmed. (2) EDIFACT MAPPING AUDIT — list every field change you plan to recommend to fix a specific EDIFACT segment output; for each one, run a WTA or WI search to confirm the current field-to-segment mapping is still active in the current product build; do not proceed to draft if the mapping is unverified or cannot be found. (3) WORK ITEM CHECK — for every technical claim in the planned response about how a CargoWise feature works, why a behavior occurs, or what the correct output should be, run `mcp_ediprod_filter-workitems` (or a WTA search) to confirm the described behavior is current and has not been changed, restricted, or removed by a recent work item; if a relevant WI is found, incorporate it into the response (fixed build, workaround, or escalation as appropriate); do not proceed to draft until this check is complete and all three audits are recorded.
-- Before saving the response to a .txt file, run a mandatory pre-save scan. Report the result of each check in chat before calling any file-creation tool. The .txt file must not be created until every check below is explicitly confirmed passed in chat: (1) INLINE URL CHECK — read every sentence in the response body that names or describes a WiseTech Academy article, Update Note, how-to, FAQ, reference guide, or other eLearning content; confirm each sentence contains the URL inline using the format `<title or description> - <url>`; fix any omission in the draft before proceeding. A URL placed only in the footer does not satisfy this check. (2) FORMATTING CHECK — confirm there are no bold or title-case section headers, no `---` horizontal rule dividers, and no ALL CAPS subheadings anywhere in the response body. (3) FOOTER COMPLETENESS CHECK — confirm the sign-off is correct; the confidence rating line is exactly `Confidence: X/5` with no inline explanation after the number; each similar incident entry contains a description and resolution outcome (not just metadata); and no URL already cited inline in the response body is repeated in the academy footer section. (4) KNOWN FAILURE MODE SCAN — explicitly state in chat whether each of the following failure modes was applicable to this response and how it was handled: UI path fabrication risk; registry mechanism scope assumption risk; EDIFACT segment-to-field mapping assumption risk; inline URL omission risk; documentation attribution phrasing risk ("CargoWise documentation confirms...", "According to WTA..."). For any that applied, confirm the verification step was completed before the draft was written.
-- Save the final client-facing response into a text file in the workspace folder.
-- Upload it to eDocs with Doc Type INT when the workflow requires upload.
-- Before the final chat response to the user, run a mandatory completion check covering: attachments successfully reviewed, attachments that could not be parsed/viewed, whether any conclusion depends on unresolved evidence, whether the ALL CAPS parse warning line must be included, whether every UI path in the response was validated, whether every recommended field change was verified against a current EDIFACT mapping source, whether the Work Item check was completed for all technical claims in the response, and whether every WiseTech Academy article, Update Note, how-to, FAQ, or other eLearning content referenced in the response body has its URL included inline in the same sentence — a footer-only URL does not satisfy this requirement.
+- Before writing the draft, internally verify: (1) UI PATH AUDIT — confirm every CargoWise module name, menu path, and navigation sequence against available evidence or documentation; remove any that cannot be confirmed. (2) EDIFACT MAPPING AUDIT — for any field-to-segment recommendations, verify the mapping is current; omit if unverified. (3) WORK ITEM CHECK — for key technical claims, run `mcp_ediprod_filter-workitems` or a WTA search to confirm the behaviour is current. These are internal checks only — do not report them in chat and do not block drafting to perform them sequentially.
+- Before finalising the response, internally verify: every WiseTech Academy article cited in the body has an inline URL; no bold/title-case section headers or `---` dividers appear in the body; the confidence rating line is exactly `Confidence: X/5`; each similar incident entry contains a description and resolution outcome.
 - If any attachment review failed or remained unavailable, include exactly one line in the final chat response: FILES COULD NOT BE PARSED: <comma-separated file names>.
-- Never omit that chat warning line merely because the client-facing INT response correctly excludes it.
-
----
-## Kibana Log Context — Section 8 Response Guidance (Addendum)
-
-This section applies only when Section 7.5 (Kibana Log Analysis) has been executed or attempted as part of the current investigation. It extends — and does not override — the existing response writing rules above.
-
-### When Kibana logs were successfully retrieved
-
-* If Kibana findings directly support a conclusion (e.g. specific error messages, failure timestamps, affected task codes), reference them briefly in Section 8 as supporting evidence.
-* Do not paste raw log data into the client-facing response. Summarise the key finding in one or two sentences only.
-* Example phrasing: `"Our log review shows that [X] errors were recorded against your installation between [time A] and [time B], consistent with the behavior you described."`
-
-### When Kibana returned no results due to missing time range
-
-If Section 7.5 exhausted all automatic search windows (±2h, 24h, 7 days) and found no results because the customer did not provide a time range, include the following as part of the Section 8 client-facing response — integrated naturally into the body, not as a standalone block:
-
-* Ask the customer how long they have been experiencing the issue.
-* Be specific — ask for approximate start date/time if possible.
-* Do not ask generically. Tie the question to the reported symptom.
-
-Example phrasing:
-`"To allow us to review the relevant system logs for your installation, could you let us know approximately when you first noticed this issue? An approximate date and time would help us focus our investigation on the correct window."`
-
-### When the customer already provided a time range
-
-* Do not ask for time range again.
-* If Kibana found relevant results within the customer-provided window, summarise them as supporting evidence.
-* If Kibana found no results within the customer-provided window, note this briefly and do not expand the search silently — inform the customer and ask if the timeframe is correct.
-
-Example phrasing:
-`"We reviewed the system logs for your installation across the period you described ([customer-stated range]) and did not find matching error events. Could you confirm whether the timeframe is correct, or whether the issue may have occurred outside this window?"`
-
-### When the customer is self-hosted (on-premises)
-
-Do not reference Kibana or log review in the Section 8 client-facing response. The absence of cloud log data must not be visible to the client.
