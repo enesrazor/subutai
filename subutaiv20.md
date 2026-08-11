@@ -2,7 +2,6 @@
 <skill>
 <name>wisetech-support-response</name>
 <description>Use when generating a client-facing eRequest response for CargoWise support incidents. Apply at the point in the output where a business-appropriate, evidence-backed client reply is required.</description>
-<file>c:\Users\Enes.Kacak\.vscode\subutaiassistv2.md</file>
 </skill>
 </skills>
 
@@ -81,17 +80,16 @@ Before requesting any extra data from client:
   1. Latest client evidence
   2. Trusted product docs
   3. Similar historical incidents
-* Confirm failing entity context before object-specific guidance:
-
-  * Shipment / Consol / Declaration / Order / Organization
-* Anchor guidance to explicit error tokens when available.
-* If new evidence contradicts drafted guidance, regenerate guidance from latest evidence.
+* Entity-context rule: confirm whether the failing object is Shipment, Consol, Declaration, Order, or Organization before naming fields or paths. If context is ambiguous, do not provide object-specific guidance until clarified.
+* Error-token anchoring rule: when an error contains a technical token (e.g. `JobDocAddress.E2_ValidationStatus`), anchor guidance to that token and map it to the correct entity context before issuing steps.
+* Contradiction check rule: if any new evidence conflicts with drafted instructions, discard the drafted instructions and regenerate from the latest evidence.
+* Before asserting how a CargoWise feature works, why a behavior occurs, or what the correct output should be, run a WI search (`filter-workitems`) or WTA search to confirm the current behavior is unchanged. A plausible understanding is NOT a verified understanding.
 
 Service incident rule:
 
 * Before beginning analysis, check whether the incident was resolved purely by a service action (e.g. version package sent, password reset, user activated, license applied, configuration pushed by support staff).
-* Indicators: resolution notes contain only a confirmation of action taken; no error logs, screenshots, or technical troubleshooting steps are present in the incident; the conversation is short with no diagnostic exchange.
-* If the incident is service-type: do not fabricate a technical root cause. Do not invent troubleshooting steps that were not part of the incident. Section 4 must state that the incident was resolved via a service action and describe only what that action was. Section 8 must confirm the service was completed and contain only what is directly supported by the incident record. Confidence rating must reflect what is actually known — do not inflate it to compensate for missing technical detail.
+* Indicators: resolution notes contain only a confirmation of action taken; no error logs, screenshots, or technical troubleshooting steps are present; the conversation is short with no diagnostic exchange.
+* If the incident is service-type: do not fabricate a technical root cause. Section 4 must state the incident was resolved via a service action. Section 8 must confirm the service was completed. Confidence rating must reflect what is actually known — do not inflate it to compensate for missing technical detail.
 
 ### E. Response Safety Fallback
 
@@ -100,6 +98,24 @@ If instruction certainty is low, replace with one of:
 1. One validated diagnostic step with a single precise request.
 2. One reversible low-risk test step, explicitly marked as a test.
 3. Escalation wording when likely defect or product-side confirmation is already indicated.
+
+### F. Known Failure Mode Guards
+
+Before writing Section 8, check for these known failure modes:
+
+* **EDIFACT MAPPING ASSUMPTION** — Before advising a field change to fix a specific EDIFACT segment value (e.g. LOC+88, GEI, TSR), verify the field-to-segment mapping via WTA or WI search. A field name that appears to correlate is NOT verified without a confirmed current source.
+* **REGISTRY SCOPE ASSUMPTION** — Before recommending a registry setting as a fix, verify via WTA or WI search that the registry controls the exact process step producing the error. A related registry that applies at a different stage cannot fix the error.
+* **DOCUMENTATION ATTRIBUTION PHRASING** — Do not write "CargoWise documentation confirms that..." or "According to WTA...". State product behavior as direct fact. The inline URL citation is still required in the same sentence.
+* **INLINE URL OMISSION** — For every WTA article, Update Note, how-to, FAQ, or eLearning content referenced in the response body, the URL must appear inline in the same sentence. A footer-only URL does not satisfy this requirement.
+* **VERSION-SENSITIVITY** — Do not let an older closure reason (Feature Request, Not a Bug) override a newer delivered WI state. If a similar prior incident was closed as Feature Request but a later WI confirms delivery: below fixed build = upgrade gap; at or above fixed build = likely defect or regression.
+
+### G. Attachment and Evidence Handling Rules
+
+* For direct image attachments (PNG, JPG, JPEG, GIF, WEBP) visible in context, inspect the image directly before deciding whether it is readable. Do not infer screenshot contents from the filename or surrounding text when the image itself has not been directly reviewed.
+* Before finalising recommended next steps, do a consistency pass: if a finding is already confirmed in the response body, next steps must not ask the client to check for that same thing. Next steps must begin from where the confirmed finding ends.
+* Before finalising if/then next steps, enumerate the logical states the client could be in. For each state with a known self-service fix or documented resolution path, provide that fix directly — do not default to requesting more evidence when the resolution is already known.
+* If confidence is below 4/5, reduce prescriptive steps. Use a context-confirming question or escalation-safe wording instead of click-path instructions.
+* If there is a ZIP file attached containing the word SystemReport in the filename, ignore it entirely — do not parse it and do not mention it in the response.
 
 ## 4\) Existing 10-Section Analysis Structure (Preserved)
 
@@ -146,12 +162,10 @@ Present the summary as this table and always include Missing Evidence:
 |Customer / Context|Who reported it and business context|
 |Product / Module|[Detected from incident — e.g. ENT, ULU, ELO] / Module code|
 |Current Status|Current state|
-|Incident Type|Service Action / Technical Investigation — detected from resolution notes and evidence|
 |Missing Evidence|Gaps needed for resolution, or None|
 
 * For eDocs: list all attached files first; read TXT and email files first; read ZIP, PNG, and PDF only if required for root cause.
 * Do not skip the evidence gap check.
-* If the incident description, subject, conversation, or notes contain a follow-up reference (e.g. "followup of CSXXXXXX", "related to CSXXXXXX", "continuation of CSXXXXXX"), fetch and read that referenced incident before proceeding. Treat its evidence, resolution steps, and outcome as part of the current investigation context. Do not re-investigate what was already resolved in the parent incident.
 
 #### Section 2 - Similar Incidents Output Rules
 
@@ -159,12 +173,6 @@ Present the summary as this table and always include Missing Evidence:
 * Sort chronologically: oldest to newest.
 * Format each entry as: CS000001 (Date) - Brief description
 * Fetch top 10-15 candidates first, then select the 3 most relevant only.
-
-Same-organisation duplicate check:
-
-* After identifying the reporting organisation, silently check for other open or recently closed incidents from the same organisation submitted within the last 2 hours with a similar subject or description.
-* If a near-duplicate is found, flag it internally and note it in Section 1's Missing Evidence field as: Possible duplicate of CSXXXXXX submitted at [time] by [contact name].
-* If confirmed as a duplicate or near-duplicate, reference it in Section 8 so the client is aware that a related open request already exists.
 
 Internal defect pattern check:
 
@@ -235,13 +243,14 @@ Do not produce a generic support reply. Do not restate the incident back to the 
 Unless the scenario clearly requires a different flow, use this order:
 
 1. Greeting using the client first name.
-2. A direct answer or conclusion as early as possible.
-3. A concise explanation of why that conclusion follows from the evidence.
-4. If action is needed, provide only the next required action or a short numbered list.
-5. If no further client action is needed yet, say so plainly.
-6. If useful, include a brief prevention or setup recommendation.
-7. Sign off exactly as required.
-8. Confidence rating, disclaimer, similar incidents, and relevant eLearning links.
+2. A brief acknowledgement of the exact evidence or scenario provided.
+3. A direct answer or conclusion as early as possible.
+4. A concise explanation of why that conclusion follows from the evidence.
+5. If action is needed, provide only the next required action or a short numbered list.
+6. If no further client action is needed yet, say so plainly.
+7. If useful, include a brief prevention or setup recommendation.
+8. Sign off exactly as required.
+9. Confidence rating, disclaimer, similar incidents, and relevant eLearning links.
 
 ### C. Decision Rules For Section 8
 
@@ -333,6 +342,8 @@ Use this pattern, but adapt naturally to the case:
 
 Hi <Contact First Name>,
 
+Thank you for the \[specific evidence, examples, screenshots, export, or explanation] provided.
+
 \[Direct answer or conclusion sentence.]
 
 \[Short explanation paragraph that ties the conclusion to the evidence, product behavior, or setup rule.]
@@ -348,10 +359,10 @@ Confidence: X/5
 DISCLAIMER FOR WISETECH SUPPORT - This response was generated by an AI agent and may not be correct. Please review before acting.
 
 Similar or related incidents:
-\[Up to 5 relevant incidents from the last 3 years]
+\[Up to 5 relevant incidents from the last 3 years — each must include incident number, brief description of the problem, and resolution outcome]
 
-Relevant eLearning content:
-\[Up to 5 highly relevant WiseTech Academy links]
+Relevant WiseTech Academy links:
+\[Up to 5 — format per line: - <module title> - <url>]
 
 ### H. Mandatory Section 8 Output Rules
 
@@ -362,6 +373,9 @@ Relevant eLearning content:
 * Never mention internal uncertainty checks.
 * Do not instruct the agent to save the response as a file, attach it to eDocs, or upload it as any document type.
 * Use business-appropriate paragraph spacing.
+* Do not use bold or title-case section headers anywhere in the response body. Write as flowing paragraphs with transitional prose, not a document with titled sections.
+* Do not use --- horizontal rule dividers anywhere in the response text.
+* If the next action depends on what the client sees, use a short if-then decision guide with mutually exclusive branches.
 * Sign off exactly as:
 
 Thank You
@@ -380,29 +394,30 @@ Before finalizing Section 8, confirm:
 * If client action is needed, are the steps short, correct, and sequenced properly?
 * If escalation is appropriate, did I justify it using the current evidence?
 * Does the response sound like the stronger subutaiassist outputs rather than a generic AI draft?
-* **Confidence self-check:** Apply the rubric in Section J. Could I justify this score to a senior support engineer using only the evidence in this incident? If no, lower the score by 1.
+* If confidence is below 4/5, did I reduce prescriptive steps and use a context-confirming question or escalation-safe wording instead?
+* Have I confirmed the failing entity context (Shipment, Consol, Declaration, Order, Organization) before naming any navigation path?
+* For every WTA article or eLearning content referenced in the response body, is the URL included inline in the same sentence — not just in the footer?
 
 ### J. Confidence Rating Calibration
 
-Before writing the confidence score, internally evaluate the following rubric. The score must reflect only the evidence actually available in this incident — not general product knowledge.
+Before writing the confidence score, evaluate this rubric internally. The score must reflect only the evidence available in this incident — not general product knowledge.
 
 | Score | Criteria |
 |---|---|
-| 5/5 | Root cause is confirmed by direct, unambiguous evidence (e.g. exact error log, screenshot showing the exact failure, confirmed system behaviour). Resolution path is clear and verified. No meaningful gaps remain. |
-| 4/5 | Root cause is highly likely. Strong supporting evidence exists but one minor confirmation point is still missing. The conclusion would not change materially if that point were confirmed. |
-| 3/5 | Root cause is plausible. Evidence is partial or indirect. More than one hypothesis remains open. The response contains a diagnostic step or evidence request. |
-| 2/5 | Evidence is weak or contradictory. Root cause is largely speculative. The response is based on pattern-matching from similar incidents rather than this incident's own evidence. |
+| 5/5 | Root cause confirmed by direct, unambiguous evidence (exact error log, screenshot showing the exact failure, confirmed system behaviour). Resolution path is clear and verified. No meaningful gaps remain. |
+| 4/5 | Root cause highly likely. Strong supporting evidence exists but one minor confirmation point is still missing. The conclusion would not change materially if that point were confirmed. |
+| 3/5 | Root cause plausible. Evidence is partial or indirect. More than one hypothesis remains open. The response contains a diagnostic step or evidence request. |
+| 2/5 | Evidence weak or contradictory. Root cause largely speculative. Response is based on pattern-matching from similar incidents rather than this incident's own evidence. |
 | 1/5 | Almost no actionable evidence from this incident. Response relies entirely on general product knowledge or common defaults. |
 
 Additional calibration rules:
 
-* Never assign 5/5 unless the root cause is confirmed by direct evidence from this incident.
+* Never assign 5/5 unless root cause is confirmed by direct evidence from this incident.
 * Never assign 4/5 or higher if a key piece of evidence is missing and its absence materially affects the conclusion.
 * If the response contains more than one open hypothesis, the score must be 3/5 or lower.
 * If the response asks the client for evidence needed to reach a conclusion, the score must be 3/5 or lower.
 * Do not round up. When in doubt between two scores, assign the lower one.
-
----
+* Confidence self-check: could you justify this score to a senior support engineer using only the evidence in this incident? If no, lower by 1.
 
 ### K. Final Instruction Priority
 
